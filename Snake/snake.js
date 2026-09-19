@@ -1,177 +1,198 @@
 const canvas = document.getElementById('game-board');
-const ctx = canvas.getContext('2d');
-const scoreElement = document.getElementById('score');
-const bestElement = document.getElementById('best-score');
-const message = document.getElementById('game-message');
+const context = canvas.getContext('2d');
+const boardSize = 20;
+const cellSize = canvas.width / boardSize;
+const scoreText = document.getElementById('score');
+const bestScoreText = document.getElementById('best-score');
+const gameMessage = document.getElementById('game-message');
 const messageTitle = document.getElementById('message-title');
 const messageText = document.getElementById('message-text');
 const startButton = document.getElementById('start-button');
-
-const tiles = 20;
-const tileSize = canvas.width / tiles;
-const startingSnake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
 
 let snake;
 let apple;
 let direction;
 let nextDirection;
 let score = 0;
+let timer;
+let isPlaying = false;
 let bestScore = Number(localStorage.getItem('snake-best-score')) || 0;
-let gameTimer;
-let playing = false;
 
-bestElement.textContent = bestScore;
+bestScoreText.textContent = bestScore;
 
 function resetGame() {
-    snake = startingSnake.map(part => ({ ...part }));
-    direction = { x: 1, y: 0 };
-    nextDirection = { ...direction };
-    score = 0;
-    scoreElement.textContent = score;
-    placeApple();
-    draw();
+  snake = [
+    { x: 10, y: 10 },
+    { x: 9, y: 10 },
+    { x: 8, y: 10 }
+  ];
+
+  direction = { x: 1, y: 0 };
+  nextDirection = { x: 1, y: 0 };
+  score = 0;
+  scoreText.textContent = score;
+
+  placeApple();
+  drawBoard();
 }
 
 function startGame() {
-    clearInterval(gameTimer);
-    resetGame();
-    playing = true;
-    message.classList.add('hidden');
-    gameTimer = setInterval(moveSnake, 115);
+  clearInterval(timer);
+  resetGame();
+  isPlaying = true;
+  gameMessage.classList.add('hidden');
+  timer = setInterval(moveSnake, 115);
 }
 
 function endGame() {
-    playing = false;
-    clearInterval(gameTimer);
-    messageTitle.textContent = 'Game over!';
-    messageText.textContent = `You scored ${score}. Have another go?`;
-    startButton.textContent = 'Play again';
-    message.classList.remove('hidden');
+  isPlaying = false;
+  clearInterval(timer);
+  messageTitle.textContent = 'Game over!';
+  messageText.textContent = `You scored ${score}. Have another go?`;
+  startButton.textContent = 'Play again';
+  gameMessage.classList.remove('hidden');
 }
 
 function moveSnake() {
-    direction = nextDirection;
-    const head = snake[0];
-    const newHead = { x: head.x + direction.x, y: head.y + direction.y };
+  direction = nextDirection;
 
-    if (hitWall(newHead) || hitSelf(newHead)) {
-        endGame();
-        return;
+  const head = {
+    x: snake[0].x + direction.x,
+    y: snake[0].y + direction.y
+  };
+
+  if (head.x < 0 || head.x >= boardSize || head.y < 0 || head.y >= boardSize) {
+    endGame();
+    return;
+  }
+
+  if (snake.some(part => part.x === head.x && part.y === head.y)) {
+    endGame();
+    return;
+  }
+
+  snake.unshift(head);
+
+  if (head.x === apple.x && head.y === apple.y) {
+    score += 1;
+    scoreText.textContent = score;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestScoreText.textContent = bestScore;
+      localStorage.setItem('snake-best-score', bestScore);
     }
 
-    snake.unshift(newHead);
-    if (newHead.x === apple.x && newHead.y === apple.y) {
-        score += 1;
-        scoreElement.textContent = score;
-        if (score > bestScore) {
-            bestScore = score;
-            bestElement.textContent = bestScore;
-            localStorage.setItem('snake-best-score', bestScore);
-        }
-        placeApple();
-    } else {
-        snake.pop();
-    }
+    placeApple();
+  } else {
+    snake.pop();
+  }
 
-    draw();
-}
-
-function hitWall(head) {
-    return head.x < 0 || head.x >= tiles || head.y < 0 || head.y >= tiles;
-}
-
-function hitSelf(head) {
-    return snake.some(part => part.x === head.x && part.y === head.y);
+  drawBoard();
 }
 
 function placeApple() {
-    do {
-        apple = { x: Math.floor(Math.random() * tiles), y: Math.floor(Math.random() * tiles) };
-    } while (snake && snake.some(part => part.x === apple.x && part.y === apple.y));
+  do {
+    apple = {
+      x: Math.floor(Math.random() * boardSize),
+      y: Math.floor(Math.random() * boardSize)
+    };
+  } while (snake.some(part => part.x === apple.x && part.y === apple.y));
 }
 
-function draw() {
-    ctx.fillStyle = '#dff0b0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+function drawBoard() {
+  context.fillStyle = '#dff0b0';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-    // The subtle checkerboard makes the play area easier to read.
-    for (let y = 0; y < tiles; y += 1) {
-        for (let x = 0; x < tiles; x += 1) {
-            if ((x + y) % 2 === 0) {
-                ctx.fillStyle = 'rgba(255, 255, 255, .12)';
-                ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-            }
-        }
+  for (let y = 0; y < boardSize; y += 1) {
+    for (let x = 0; x < boardSize; x += 1) {
+      if ((x + y) % 2 === 0) {
+        context.fillStyle = 'rgba(255, 255, 255, .12)';
+        context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+      }
     }
+  }
 
-    drawApple();
-    snake.forEach((part, index) => drawSnakePart(part, index === 0));
+  drawApple();
+  drawSnake();
 }
 
-function drawSnakePart(part, isHead) {
-    const gap = 2.5;
-    const x = part.x * tileSize + gap;
-    const y = part.y * tileSize + gap;
-    const size = tileSize - gap * 2;
-    ctx.fillStyle = isHead ? '#26734d' : '#38a169';
-    roundRect(x, y, size, size, 5);
-    ctx.fill();
+function drawSnake() {
+  snake.forEach((part, index) => {
+    const x = part.x * cellSize + 2.5;
+    const y = part.y * cellSize + 2.5;
+    const size = cellSize - 5;
 
-    if (isHead) {
-        ctx.fillStyle = '#f4f7ee';
-        const eyeX = direction.x === -1 ? x + 5 : direction.x === 1 ? x + size - 8 : x + 7;
-        const eyeY = direction.y === -1 ? y + 5 : direction.y === 1 ? y + size - 8 : y + 7;
-        ctx.beginPath();
-        ctx.arc(eyeX, eyeY, 2, 0, Math.PI * 2);
-        ctx.fill();
+    context.fillStyle = index === 0 ? '#26734d' : '#38a169';
+    context.beginPath();
+    context.roundRect(x, y, size, size, 5);
+    context.fill();
+
+    if (index === 0) {
+      context.fillStyle = '#f4f7ee';
+      const eyeX = direction.x === -1 ? x + 5 : direction.x === 1 ? x + size - 8 : x + 7;
+      const eyeY = direction.y === -1 ? y + 5 : direction.y === 1 ? y + size - 8 : y + 7;
+
+      context.beginPath();
+      context.arc(eyeX, eyeY, 2, 0, Math.PI * 2);
+      context.fill();
     }
+  });
 }
 
 function drawApple() {
-    const centerX = apple.x * tileSize + tileSize / 2;
-    const centerY = apple.y * tileSize + tileSize / 2 + 1;
-    ctx.fillStyle = '#ee6654';
-    ctx.beginPath();
-    ctx.arc(centerX - 3, centerY, 6, 0, Math.PI * 2);
-    ctx.arc(centerX + 3, centerY, 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = '#26734d';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(centerX, centerY - 5);
-    ctx.lineTo(centerX + 2, centerY - 9);
-    ctx.stroke();
+  const x = apple.x * cellSize + cellSize / 2;
+  const y = apple.y * cellSize + cellSize / 2 + 1;
+
+  context.fillStyle = '#ee6654';
+  context.beginPath();
+  context.arc(x - 3, y, 6, 0, Math.PI * 2);
+  context.arc(x + 3, y, 6, 0, Math.PI * 2);
+  context.fill();
+
+  context.strokeStyle = '#26734d';
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(x, y - 5);
+  context.lineTo(x + 2, y - 9);
+  context.stroke();
 }
 
-function roundRect(x, y, width, height, radius) {
-    ctx.beginPath();
-    ctx.roundRect(x, y, width, height, radius);
-}
+function changeDirection(name) {
+  let newDirection;
 
-function changeDirection(newDirection) {
-    if (!playing) return;
-    const isOpposite = newDirection.x === -direction.x && newDirection.y === -direction.y;
-    if (!isOpposite) nextDirection = newDirection;
-}
+  if (name === 'up') newDirection = { x: 0, y: -1 };
+  if (name === 'down') newDirection = { x: 0, y: 1 };
+  if (name === 'left') newDirection = { x: -1, y: 0 };
+  if (name === 'right') newDirection = { x: 1, y: 0 };
 
-const directions = {
-    up: { x: 0, y: -1 },
-    down: { x: 0, y: 1 },
-    left: { x: -1, y: 0 },
-    right: { x: 1, y: 0 }
-};
+  if (!isPlaying || !newDirection) return;
+
+  if (newDirection.x === -direction.x && newDirection.y === -direction.y) {
+    return;
+  }
+
+  nextDirection = newDirection;
+}
 
 document.addEventListener('keydown', event => {
-    const keys = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right' };
-    const choice = keys[event.key];
-    if (choice) {
-        event.preventDefault();
-        changeDirection(directions[choice]);
-    }
+  let name;
+
+  if (event.key === 'ArrowUp' || event.key === 'w') name = 'up';
+  if (event.key === 'ArrowDown' || event.key === 's') name = 'down';
+  if (event.key === 'ArrowLeft' || event.key === 'a') name = 'left';
+  if (event.key === 'ArrowRight' || event.key === 'd') name = 'right';
+
+  if (name) {
+    event.preventDefault();
+    changeDirection(name);
+  }
 });
 
 document.querySelectorAll('.direction').forEach(button => {
-    button.addEventListener('click', () => changeDirection(directions[button.dataset.direction]));
+  button.addEventListener('click', () => {
+    changeDirection(button.dataset.direction);
+  });
 });
 
 startButton.addEventListener('click', startGame);
