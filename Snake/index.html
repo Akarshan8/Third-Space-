@@ -1,52 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Snake | Classic Arcade Game</title>
-    <link rel="stylesheet" href="snake.css" />
-  </head>
-  <body>
-    <main class="game-shell">
-      <header class="game-header">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake | Classic Arcade Game</title>
+  <link rel="stylesheet" href="snake.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="game-header">
+      <div>
+        <p class="eyebrow">CLASSIC ARCADE</p>
+        <h1>Snake</h1>
+      </div>
+
+      <div class="score-board" aria-label="Game scores">
         <div>
-          <p class="eyebrow">CLASSIC ARCADE</p>
-          <h1>Snake</h1>
+          <span>Score</span>
+          <strong id="score">0</strong>
         </div>
-        <div class="score-board" aria-label="Game scores">
-          <div>
-            <span>Score</span>
-            <strong id="score">0</strong>
-          </div>
-          <div>
-            <span>Best</span>
-            <strong id="best-score">0</strong>
-          </div>
+        <div>
+          <span>Best</span>
+          <strong id="best-score">0</strong>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <section class="game-card">
-        <div class="canvas-wrap">
-          <canvas id="game-board" width="400" height="400" aria-label="Snake game board"></canvas>
-          <div class="game-message" id="game-message">
-            <span class="message-icon">🐍</span>
-            <h2 id="message-title">Ready to play?</h2>
-            <p id="message-text">Use the arrow keys or WASD to move</p>
-            <button id="start-button" type="button">Start game</button>
-          </div>
+    <section class="game-card">
+      <div class="canvas-wrap">
+        <canvas id="game-board" width="400" height="400" aria-label="Snake game board"></canvas>
+
+        <div class="game-message" id="game-message">
+          <span class="message-icon">🐍</span>
+          <h2 id="message-title">Ready to play?</h2>
+          <p id="message-text">Use the arrow keys or WASD to move</p>
+          <button id="start-button" type="button">Start game</button>
         </div>
+      </div>
 
-        <div class="controls" aria-label="Touch controls">
-          <button class="direction up" data-direction="up" aria-label="Move up">▲</button>
-          <button class="direction left" data-direction="left" aria-label="Move left">◀</button>
-          <button class="direction down" data-direction="down" aria-label="Move down">▼</button>
-          <button class="direction right" data-direction="right" aria-label="Move right">▶</button>
-        </div>
+      <div class="controls" aria-label="Touch controls">
+        <button class="direction up" data-direction="up" aria-label="Move up">▲</button>
+        <button class="direction left" data-direction="left" aria-label="Move left">◀</button>
+        <button class="direction down" data-direction="down" aria-label="Move down">▼</button>
+        <button class="direction right" data-direction="right" aria-label="Move right">▶</button>
+      </div>
 
-        <p class="tip"><span>Tip</span> Eat the red apples, but don't run into yourself!</p>
-      </section>
-    </main>
+      <p class="tip"><span>Tip</span> Eat the red apples, but don't run into yourself!</p>
+    </section>
+  </main>
 
-    <script src="snake.js"></script>
-  </body>
+  <script src="snake.js"></script>
+</body>
 </html>
