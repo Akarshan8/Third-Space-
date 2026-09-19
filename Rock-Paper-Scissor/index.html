@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock, Paper, Scissors</title>
+    <link rel="stylesheet" href="rock_paper_scissor.css">
+</head>
+
+<body>
+    <main class="game" aria-labelledby="game-title">
+        <header class="intro">
+            <p class="eyebrow">A tiny game of chance</p>
+            <h1 id="game-title">Rock, Paper, Scissors</h1>
+            <p class="quote">“Sometimes the simplest choice is the hardest one to make.”</p>
+        </header>
+
+        <section class="scoreboard" aria-label="Scoreboard">
+            <div class="score"><span>You</span><strong id="playerScore">0</strong></div>
+            <div class="score-divider">:</div>
+            <div class="score"><span>Computer</span><strong id="computerScore">0</strong></div>
+        </section>
+
+        <div class="round-timer" aria-live="polite">
+            <span id="timerLabel">Time to choose</span>
+            <strong id="timer">5</strong>
+        </div>
+
+        <section class="battle" aria-label="Current round">
+            <div class="side">
+                <span class="side-label">Your move</span>
+                <div class="hand" id="playerHand" aria-live="polite">?</div>
+            </div>
+            <span class="versus">vs</span>
+            <div class="side">
+                <span class="side-label">Their move</span>
+                <div class="hand" id="computerHand" aria-live="polite">?</div>
+            </div>
+        </section>
+
+        <p class="result" id="result" aria-live="polite">Make your move</p>
+        <p class="message" id="message">No pressure. Pick the one that feels right.</p>
+
+        <section class="choices" aria-label="Choose your move">
+            <button class="choice" data-choice="rock" type="button">
+                <span class="choice-icon">✊</span>
+                <span>Rock</span>
+            </button>
+            <button class="choice" data-choice="paper" type="button">
+                <span class="choice-icon">✋</span>
+                <span>Paper</span>
+            </button>
+            <button class="choice" data-choice="scissors" type="button">
+                <span class="choice-icon">✌️</span>
+                <span>Scissors</span>
+            </button>
+        </section>
+
+        <div class="game-actions">
+            <button class="start" id="startButton" type="button">Start game</button>
+            <button class="reset" id="resetButton" type="button">Start over</button>
+        </div>
+    </main>
+
+    <script src="rock_paper_scissor.js"></script>
+</body>
+
+</html>
