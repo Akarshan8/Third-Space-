@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hangman Challenge</title>
+  <link rel="stylesheet" href="hang_man.css" />
+</head>
+<body>
+  <main class="game-card">
+    <header class="game-header">
+      <div>
+        <p class="eyebrow">WORD CHALLENGE</p>
+        <h1>Hangman</h1>
+        <p class="subtitle">Guess the hidden word before the drawing is complete.</p>
+      </div>
+      <div class="score-box" aria-label="Games won">
+        <span>WINS</span>
+        <strong id="wins">0</strong>
+      </div>
+    </header>
+
+    <section class="game-area">
+      <div class="hangman-panel" aria-label="Hangman drawing">
+        <div class="gallows">
+          <span class="beam"></span>
+          <span class="rope"></span>
+          <span class="post"></span>
+          <span class="base"></span>
+          <div class="figure">
+            <span class="head body-part"></span>
+            <span class="torso body-part"></span>
+            <span class="arm-left body-part"></span>
+            <span class="arm-right body-part"></span>
+            <span class="leg-left body-part"></span>
+            <span class="leg-right body-part"></span>
+          </div>
+        </div>
+        <p class="mistakes">Mistakes: <strong id="mistakes">0</strong> / 6</p>
+      </div>
+
+      <div class="play-panel">
+        <p class="category">CATEGORY: <span id="category">—</span></p>
+        <div id="word" class="word" aria-live="polite"></div>
+        <p id="status" class="status">Choose a letter to begin.</p>
+        <div id="keyboard" class="keyboard" aria-label="Letter keyboard"></div>
+        <div class="game-actions">
+          <button id="hint" class="hint" type="button">Use hint</button>
+          <button id="newGame" class="new-game" type="button">New game</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="hang_man.js"></script>
+</body>
+</html>
