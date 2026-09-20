@@ -1,187 +1,119 @@
-const moves = {
+var moves = ['rock', 'paper', 'scissors'];
+
+var handSigns = {
     rock: '✊',
     paper: '✋',
     scissors: '✌️'
 };
 
-const choices = ['rock', 'paper', 'scissors'];
-const roundSeconds = 5;
-const breakSeconds = 2;
+var myScore = 0;
+var cpuScore = 0;
+var playing = false;
 
-let playerScore = 0;
-let computerScore = 0;
-let timeLeft = 0;
-let computerChoice = '';
-let gameStarted = false;
-let timer;
-let nextRoundTimer;
-let revealTimer;
+var myHand = document.getElementById('playerHand');
+var cpuHand = document.getElementById('computerHand');
+var myScoreText = document.getElementById('playerScore');
+var cpuScoreText = document.getElementById('computerScore');
+var result = document.getElementById('result');
+var message = document.getElementById('message');
+var startButton = document.getElementById('startButton');
+var resetButton = document.getElementById('resetButton');
+var choiceButtons = document.querySelectorAll('.choice');
 
-const playerHand = document.getElementById('playerHand');
-const computerHand = document.getElementById('computerHand');
-const playerScoreText = document.getElementById('playerScore');
-const computerScoreText = document.getElementById('computerScore');
-const timerText = document.getElementById('timer');
-const timerLabel = document.getElementById('timerLabel');
-const timerBox = document.querySelector('.round-timer');
-const result = document.getElementById('result');
-const message = document.getElementById('message');
-const startButton = document.getElementById('startButton');
-const resetButton = document.getElementById('resetButton');
-const choiceButtons = document.querySelectorAll('.choice');
+startButton.onclick = startGame;
+resetButton.onclick = resetGame;
 
-choiceButtons.forEach(function (button) {
-    button.addEventListener('click', function () {
-        playRound(button.dataset.choice);
-    });
-});
-
-startButton.addEventListener('click', startGame);
-resetButton.addEventListener('click', resetGame);
+for (var i = 0; i < choiceButtons.length; i++) {
+    choiceButtons[i].onclick = chooseMove;
+}
 
 function startGame() {
-    gameStarted = true;
-    startButton.hidden = true;
-    startRound();
+    playing = true;
+    startButton.style.display = 'none';
+    setChoiceButtons(true);
+    result.textContent = 'Pick a move';
+    message.textContent = "Let's see what the computer picks.";
 }
 
-function startRound() {
-    clearInterval(timer);
-    clearTimeout(nextRoundTimer);
-    clearTimeout(revealTimer);
-
-    playerHand.textContent = '?';
-    computerHand.textContent = '?';
-    computerChoice = choices[Math.floor(Math.random() * choices.length)];
-    timeLeft = roundSeconds;
-
-    timerBox.classList.remove('resting', 'urgent');
-    timerLabel.textContent = 'Time to choose';
-    timerText.textContent = timeLeft;
-    setButtonsDisabled(false);
-
-    timer = setInterval(function () {
-        timeLeft -= 1;
-        timerText.textContent = timeLeft;
-
-        if (timeLeft <= 2) {
-            timerBox.classList.add('urgent');
-        }
-
-        if (timeLeft === 0) {
-            clearInterval(timer);
-            timeUp();
-        }
-    }, 1000);
+function chooseMove() {
+    var myMove = this.getAttribute('data-choice');
+    playRound(myMove);
 }
 
-function playRound(playerChoice) {
-    if (!gameStarted || computerChoice === '') {
+function playRound(myMove) {
+    var cpuMove;
+
+    if (!playing) {
         return;
     }
 
-    clearInterval(timer);
-    clearTimeout(revealTimer);
-    setButtonsDisabled(true);
+    cpuMove = chooseCpuMove();
+    updateHands(myMove, cpuMove);
 
-    const chosenComputerMove = computerChoice;
-    computerChoice = '';
-    playerHand.textContent = moves[playerChoice];
-    computerHand.textContent = '...';
-    result.textContent = 'Computer is choosing...';
-    message.textContent = 'Wait for the computer move.';
-
-    revealTimer = setTimeout(function () {
-        computerHand.textContent = moves[chosenComputerMove];
-
-        if (playerChoice === chosenComputerMove) {
-            result.textContent = 'Draw!';
-            message.textContent = 'You both chose ' + chosenComputerMove + '.';
-        } else if (
-            (playerChoice === 'rock' && chosenComputerMove === 'scissors') ||
-            (playerChoice === 'paper' && chosenComputerMove === 'rock') ||
-            (playerChoice === 'scissors' && chosenComputerMove === 'paper')
-        ) {
-            playerScore += 1;
-            playerScoreText.textContent = playerScore;
-            result.textContent = 'You win!';
-            message.textContent = 'Your move beats the computer move.';
-        } else {
-            computerScore += 1;
-            computerScoreText.textContent = computerScore;
-            result.textContent = 'Computer wins!';
-            message.textContent = 'The computer move beats yours.';
-        }
-
-        startBreak();
-    }, 1000);
-}
-
-function timeUp() {
-    if (computerChoice === '') {
-        return;
+    if (myMove === cpuMove) {
+        showDraw(cpuMove);
+    } else if (didIWin(myMove, cpuMove)) {
+        showMyWin();
+    } else {
+        showCpuWin();
     }
-
-    computerHand.textContent = moves[computerChoice];
-    playerHand.textContent = '-';
-    computerScore += 1;
-    computerScoreText.textContent = computerScore;
-    result.textContent = 'Time is up!';
-    message.textContent = 'The computer gets a point because you did not choose.';
-    computerChoice = '';
-    setButtonsDisabled(true);
-    startBreak();
 }
 
-function startBreak() {
-    clearInterval(timer);
-
-    timerBox.classList.remove('urgent');
-    timerBox.classList.add('resting');
-    timerLabel.textContent = 'Next round in';
-    timeLeft = breakSeconds;
-    timerText.textContent = timeLeft;
-    setButtonsDisabled(true);
-
-    timer = setInterval(function () {
-        timeLeft -= 1;
-        timerText.textContent = timeLeft;
-
-        if (timeLeft === 0) {
-            clearInterval(timer);
-            startRound();
-        }
-    }, 1000);
+function chooseCpuMove() {
+    var randomPlace = Math.floor(Math.random() * moves.length);
+    return moves[randomPlace];
 }
 
-function setButtonsDisabled(disabled) {
-    choiceButtons.forEach(function (button) {
-        button.disabled = disabled;
-    });
+function updateHands(myMove, cpuMove) {
+    myHand.textContent = handSigns[myMove];
+    cpuHand.textContent = handSigns[cpuMove];
 }
 
+function didIWin(myMove, cpuMove) {
+    return (myMove === 'rock' && cpuMove === 'scissors') ||
+        (myMove === 'paper' && cpuMove === 'rock') ||
+        (myMove === 'scissors' && cpuMove === 'paper');
+}
+
+function showDraw(cpuMove) {
+    result.textContent = 'It is a tie!';
+    message.textContent = 'You both picked ' + cpuMove + '.';
+}
+
+function showMyWin() {
+    myScore++;
+    myScoreText.textContent = myScore;
+    result.textContent = 'Nice one, you win!';
+    message.textContent = 'That was a good choice.';
+}
+
+function showCpuWin() {
+    cpuScore++;
+    cpuScoreText.textContent = cpuScore;
+    result.textContent = 'The computer wins this round.';
+    message.textContent = 'Try a different move next time.';
+}
+
+function setChoiceButtons(enabled) {
+    for (var i = 0; i < choiceButtons.length; i++) {
+        choiceButtons[i].disabled = !enabled;
+    }
+}
+
+// Start the scores and hands over from the beginning.
 function resetGame() {
-    clearInterval(timer);
-    clearTimeout(nextRoundTimer);
-    clearTimeout(revealTimer);
+    myScore = 0;
+    cpuScore = 0;
+    playing = false;
 
-    playerScore = 0;
-    computerScore = 0;
-    computerChoice = '';
-    gameStarted = false;
-
-    playerScoreText.textContent = '0';
-    computerScoreText.textContent = '0';
-    playerHand.textContent = '?';
-    computerHand.textContent = '?';
+    myScoreText.textContent = '0';
+    cpuScoreText.textContent = '0';
+    myHand.textContent = '?';
+    cpuHand.textContent = '?';
     result.textContent = 'Press Start Game to begin';
-    message.textContent = 'You will have five seconds to choose.';
-    timerLabel.textContent = 'Ready';
-    timerText.textContent = '-';
-    timerBox.classList.remove('urgent');
-    timerBox.classList.add('resting');
-    startButton.hidden = false;
-    setButtonsDisabled(true);
+    message.textContent = 'Choose a move to play.';
+    startButton.style.display = 'inline-block';
+    setChoiceButtons(false);
 }
 
-resetGame();
+resetGame(); 
