@@ -1,71 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock, Paper, Scissors</title>
-    <link rel="stylesheet" href="rock_paper_scissor.css">
+    <title>Rock Paper Scissor</title>
+    <link rel="stylesheet" href="rock_paper_scissor.js">
 </head>
 <body>
-    <main class="game">
-        <header class="intro">
-            <p class="eyebrow">School Game</p>
-            <h1>Rock, Paper, Scissors</h1>
-            <p class="quote">Choose one of the three moves to play.</p>
-        </header>
+    <div class="game">
+        <h1>Rock Paper Scissors</h1>
+        <p>Choose rock, paper, or scissors.</p>
 
-        <section class="scoreboard" aria-label="Score">
-            <div class="score">
-                <span>You</span>
-                <strong id="playerScore">0</strong>
-            </div>
-            <span class="score-divider">:</span>
-            <div class="score">
-                <span>Computer</span>
-                <strong id="computerScore">0</strong>
-            </div>
-        </section>
-
-        <div class="round-timer" aria-live="polite">
-            <span id="timerLabel">Ready</span>
-            <strong id="timer">-</strong>
+        <div class="score">
+            <div>You: <span id="playerScore">0</span></div>
+            <div>Computer: <span id="computerScore">0</span></div>
         </div>
 
-        <section class="battle" aria-label="Current moves">
-            <div class="side">
-                <span class="side-label">Your move</span>
+        <div class="moves">
+            <div>
+                <p>Your move</p>
                 <div class="hand" id="playerHand">?</div>
             </div>
-            <span class="versus">vs</span>
-            <div class="side">
-                <span class="side-label">Computer move</span>
+            <div class="vs">vs</div>
+            <div>
+                <p>Computer move</p>
                 <div class="hand" id="computerHand">?</div>
             </div>
-        </section>
-
-        <p class="result" id="result" aria-live="polite">Press Start Game to begin</p>
-        <p class="message" id="message">You will have five seconds to choose.</p>
-
-        <section class="choices" aria-label="Choose a move">
-            <button class="choice" data-choice="rock" type="button">
-                <span class="choice-icon">✊</span>
-                <span>Rock</span>
-            </button>
-            <button class="choice" data-choice="paper" type="button">
-                <span class="choice-icon">✋</span>
-                <span>Paper</span>
-            </button>
-            <button class="choice" data-choice="scissors" type="button">
-                <span class="choice-icon">✌️</span>
-                <span>Scissors</span>
-            </button>
-        </section>
-
-        <div class="game-actions">
-            <button class="start" id="startButton" type="button">Start Game</button>
-            <button class="reset" id="resetButton" type="button">Start Over</button>
         </div>
-    </main>
+
+        <p id="result">Press Start Game to begin</p>
+        <p id="message">Choose a move to play.</p>
+
+        <div class="choices">
+            <button class="choice" data-choice="rock" disabled>✊ Rock</button>
+            <button class="choice" data-choice="paper" disabled>✋ Paper</button>
+            <button class="choice" data-choice="scissors" disabled>✌️ Scissors</button>
+        </div>
+
+        <button id="startButton">Start Game</button>
+        <button id="resetButton">Start Over</button>
+    </div>
 
     <script src="rock_paper_scissor.js"></script>
 </body>
