@@ -1,4 +1,5 @@
-const words = [
+// I keep the word choices here so it is easy to add or remove a word later.
+const possibleWords = [
   { word: 'JAVASCRIPT', category: 'Technology', hint: 'A language used to make web pages interactive.' },
   { word: 'COMPUTER', category: 'Technology', hint: 'An electronic machine that processes information.' },
   { word: 'KEYBOARD', category: 'Technology', hint: 'A device used to type letters and numbers.' },
@@ -41,9 +42,11 @@ const words = [
   { word: 'DISCOVERY', category: 'Ideas', hint: 'Something found for the first time.' }
 ];
 
+// These are the letters shown on the on-screen keyboard.
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const maxMistakes = 6;
+const allowedMistakes = 6;
 
+// These variables connect the JavaScript to the HTML elements.
 const wordElement = document.querySelector('#word');
 const categoryElement = document.querySelector('#category');
 const statusElement = document.querySelector('#status');
@@ -54,39 +57,35 @@ const hintButton = document.querySelector('#hint');
 const newGameButton = document.querySelector('#newGame');
 const bodyParts = document.querySelectorAll('.body-part');
 
+// These values change while the player is playing.
 let currentWord;
-let guessedLetters = [];
-let unusedWords = [];
-let mistakes = 0;
-let wins = 0;
-let gameOver = false;
+let triedLetters = [];
+let mistakeCount = 0;
+let winCount = 0;
+let gameFinished = false;
 
+// A new word is chosen when the page opens or New game is clicked.
 function startGame() {
-  if (unusedWords.length === 0) {
-    for (let i = 0; i < words.length; i += 1) {
-      unusedWords.push(words[i]);
-    }
-  }
-
-  const randomNumber = Math.floor(Math.random() * unusedWords.length);
-  currentWord = unusedWords[randomNumber];
-  unusedWords.splice(randomNumber, 1);
-  guessedLetters = [];
-  mistakes = 0;
-  gameOver = false;
+  // Pick a word for the new game.
+  const randomNumber = Math.floor(Math.random() * possibleWords.length);
+  currentWord = possibleWords[randomNumber];
+  triedLetters = [];
+  mistakeCount = 0;
+  gameFinished = false;
 
   categoryElement.textContent = currentWord.category;
-  mistakesElement.textContent = mistakes;
+  mistakesElement.textContent = mistakeCount;
   statusElement.textContent = 'Choose a letter to begin.';
   statusElement.className = 'status';
   hintButton.disabled = false;
 
-  renderWord();
-  renderKeyboard();
-  updateDrawing();
+  showWord();
+  makeKeyboard();
+  drawHangman();
 }
 
-function renderWord() {
+// After a letter is chosen, show it here if it belongs to the word.
+function showWord() {
   wordElement.innerHTML = '';
 
   for (let i = 0; i < currentWord.word.length; i += 1) {
@@ -94,7 +93,7 @@ function renderWord() {
     const letter = currentWord.word[i];
 
     letterElement.className = 'letter';
-    if (guessedLetters.includes(letter)) {
+    if (triedLetters.includes(letter)) {
       letterElement.textContent = letter;
     } else {
       letterElement.textContent = '\u00a0';
@@ -104,7 +103,8 @@ function renderWord() {
   }
 }
 
-function renderKeyboard() {
+// Make a button for every letter the player can choose.
+function makeKeyboard() {
   keyboardElement.innerHTML = '';
 
   for (let i = 0; i < alphabet.length; i += 1) {
@@ -115,78 +115,95 @@ function renderKeyboard() {
     button.type = 'button';
     button.textContent = letter;
     button.addEventListener('click', function () {
-      guess(letter, button);
+      checkLetter(letter, button);
     });
     keyboardElement.appendChild(button);
   }
 }
 
-function guess(letter, button) {
-  if (gameOver || guessedLetters.includes(letter)) {
+// When the player clicks a letter, check whether it is in the word.
+function checkLetter(letter, button) {
+  if (gameFinished || triedLetters.includes(letter)) {
     return;
   }
 
-  guessedLetters.push(letter);
+  triedLetters.push(letter);
   button.disabled = true;
 
+  // If the letter is in the word, show it to the player.
   if (currentWord.word.includes(letter)) {
     button.classList.add('correct');
-    renderWord();
+    showWord();
 
-    let wordIsComplete = true;
-    for (let i = 0; i < currentWord.word.length; i += 1) {
-      if (!guessedLetters.includes(currentWord.word[i])) {
-        wordIsComplete = false;
-        break;
-      }
-    }
-
-    if (wordIsComplete) {
-      finishGame(true);
+    // If every letter is showing, the player wins.
+    if (checkWin()) {
+      winGame();
     }
   } else {
+    // If the letter is not in the word, add one mistake.
     button.classList.add('wrong');
-    mistakes += 1;
-    mistakesElement.textContent = mistakes;
-    updateDrawing();
+    mistakeCount += 1;
+    mistakesElement.textContent = mistakeCount;
+    drawHangman();
 
-    if (mistakes >= maxMistakes) {
-      finishGame(false);
+    if (mistakeCount >= allowedMistakes) {
+      loseGame();
     }
   }
 }
 
-function finishGame(won) {
-  gameOver = true;
+// Return true when the player has guessed every letter.
+function checkWin() {
+  for (let i = 0; i < currentWord.word.length; i += 1) {
+    if (!triedLetters.includes(currentWord.word[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// This happens when the player guesses the word.
+function winGame() {
+  gameFinished = true;
   hintButton.disabled = true;
+  winCount += 1;
+  winsElement.textContent = winCount;
+  statusElement.textContent = 'You got it! Great job.';
+  statusElement.className = 'status success';
 
   const keys = keyboardElement.querySelectorAll('.key');
   for (let i = 0; i < keys.length; i += 1) {
     keys[i].disabled = true;
   }
+}
 
-  if (won) {
-    wins += 1;
-    winsElement.textContent = wins;
-    statusElement.textContent = 'You got it! Great job.';
-    statusElement.className = 'status success';
-  } else {
-    for (let i = 0; i < currentWord.word.length; i += 1) {
-      const letter = currentWord.word[i];
-      if (!guessedLetters.includes(letter)) {
-        guessedLetters.push(letter);
-      }
+// This happens when the player makes too many mistakes.
+function loseGame() {
+  gameFinished = true;
+  hintButton.disabled = true;
+
+  for (let i = 0; i < currentWord.word.length; i += 1) {
+    const letter = currentWord.word[i];
+    if (!triedLetters.includes(letter)) {
+      triedLetters.push(letter);
     }
+  }
 
-    renderWord();
-    statusElement.textContent = 'Game over — the word was ' + currentWord.word + '.';
-    statusElement.className = 'status failure';
+  showWord();
+  statusElement.textContent = 'Game over — the word was ' + currentWord.word + '.';
+  statusElement.className = 'status failure';
+
+  const keys = keyboardElement.querySelectorAll('.key');
+  for (let i = 0; i < keys.length; i += 1) {
+    keys[i].disabled = true;
   }
 }
 
-function updateDrawing() {
+// Show one more part of the drawing after a wrong guess.
+function drawHangman() {
   for (let i = 0; i < bodyParts.length; i += 1) {
-    if (i < mistakes) {
+    if (i < mistakeCount) {
       bodyParts[i].style.opacity = '1';
     } else {
       bodyParts[i].style.opacity = '0';
@@ -194,36 +211,26 @@ function updateDrawing() {
   }
 }
 
+// When the player clicks Hint, show the first hidden letter.
 hintButton.addEventListener('click', function () {
-  if (gameOver) {
+  if (gameFinished) {
     return;
   }
 
-  const hiddenLetters = [];
   for (let i = 0; i < currentWord.word.length; i += 1) {
     const letter = currentWord.word[i];
-    if (!guessedLetters.includes(letter) && !hiddenLetters.includes(letter)) {
-      hiddenLetters.push(letter);
-    }
-  }
 
-  if (hiddenLetters.length === 0) {
-    return;
-  }
+    if (!triedLetters.includes(letter)) {
+      triedLetters.push(letter);
+      showWord();
 
-  const randomNumber = Math.floor(Math.random() * hiddenLetters.length);
-  const hintLetter = hiddenLetters[randomNumber];
-  const keys = keyboardElement.querySelectorAll('.key');
-  let hintKey;
-
-  for (let i = 0; i < keys.length; i += 1) {
-    if (keys[i].textContent === hintLetter) {
-      hintKey = keys[i];
+      if (checkWin()) {
+        winGame();
+      }
       break;
     }
   }
 
-  guess(hintLetter, hintKey);
   hintButton.disabled = true;
 });
 
